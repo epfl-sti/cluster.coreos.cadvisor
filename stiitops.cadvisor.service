@@ -1,0 +1,17 @@
+# /run/fleet/units/stiitops.cadvisor.service
+[Unit]
+Description=cAdvisor
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=/bin/bash -c '/usr/bin/docker rm -f %n || true'
+ExecStop=/bin/bash -c '/usr/bin/docker rm -f %n || true'
+ExecStart=/usr/bin/docker run --volume=/var/run:/var/run:rw \
+                              --volume=/sys:/sys:ro \
+                              --volume=/var/lib/docker/:/var/lib/docker:ro \
+                              --publish=8087:8080 \
+                              --name=%n google/cadvisor:latest
+
+[X-Fleet]
+Global=true
