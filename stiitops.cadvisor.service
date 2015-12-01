@@ -7,11 +7,16 @@ Requires=docker.service
 [Service]
 ExecStartPre=/bin/bash -c '/usr/bin/docker rm -f %n || true'
 ExecStop=/bin/bash -c '/usr/bin/docker rm -f %n || true'
-ExecStart=/usr/bin/docker run --volume=/var/run:/var/run:rw \
-                              --volume=/sys:/sys:ro \
-                              --volume=/var/lib/docker/:/var/lib/docker:ro \
-                              --publish=8087:8080 \
-                              --name=%n google/cadvisor:latest
+ExecStart=/usr/bin/docker run \
+		--volume=/:/rootfs:ro \
+		--volume=/var/run:/var/run:rw \
+		--volume=/sys:/sys:ro \
+		--volume=/var/lib/docker/:/var/lib/docker:ro \
+		--volume=/sys/fs/cgroup/:/sys/fs/cgroup:ro \
+		--publish=8087:8080 \
+		--name=%n \
+		google/cadvisor:0.19.3
+# add "--logtostderr" to see err output
 
 [X-Fleet]
 Global=true
