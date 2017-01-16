@@ -5,18 +5,20 @@ After=docker.service
 Requires=docker.service
 
 [Service]
-ExecStartPre=/bin/bash -c '/usr/bin/docker rm -f %n || true'
-ExecStop=/bin/bash -c '/usr/bin/docker rm -f %n || true'
+ExecStartPre=/bin/sh -c "docker history google/cadvisor:latest >/dev/null 2>&1 || docker pull google/cadvisor:latest"
+ExecStartPre=/bin/sh -c "docker inspect %n >/dev/null 2>&1 && docker rm -f %n || true"
 ExecStart=/usr/bin/docker run \
-		--volume=/:/rootfs:ro \
-		--volume=/var/run:/var/run:rw \
-		--volume=/sys:/sys:ro \
-		--volume=/var/lib/docker/:/var/lib/docker:ro \
-		--volume=/sys/fs/cgroup/:/sys/fs/cgroup:ro \
-		--publish=8087:8080 \
-		--name=%n \
-		google/cadvisor:0.19.3
+	--volume=/:/rootfs:ro \
+	--volume=/var/run:/var/run:rw \
+	--volume=/sys:/sys:ro \
+	--volume=/var/lib/docker/:/var/lib/docker:ro \
+	--publish=8087:8080 \
+	--name=%n \
+	google/cadvisor:latest
 # add "--logtostderr" to see err output
+ExecStopPost=/bin/sh -c "usr/bin/docker rm -f %n"
+Restart=on-failure
+RestartSec=5
 
 [X-Fleet]
 Global=true
